@@ -18,6 +18,3 @@ class Solution:
             currB = currB.next if currB else headA
         
         return currA
-
-    
-        
