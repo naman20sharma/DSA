@@ -1,44 +1,35 @@
 class Solution:
     def canPartitionKSubsets(self, nums: List[int], k: int) -> bool:
-        n = len(nums)
-        total = sum(nums)
-        target = total // k
-
-        if total % k != 0:
-            return False
-
+        total_sum = sum(nums)
+        
+        if total_sum % k != 0:
+            return False  # Can't divide evenly
+        
+        target = total_sum // k
         nums.sort(reverse=True)
-        taken = ['0'] * n
-
-        memo = {}
-        def backtracking(curIndex, curSides, curSum):
-            if curSides == k - 1:
-                return True
-
-            if curSum > target:
-                return False
-
-            if curSum == target:
-                return backtracking(0, curSides + 1, 0)
-
-            if (curIndex, curSides, curSum, ''.join(taken)) in memo:
-                return memo[(curIndex, curSides, curSum, ''.join(taken))]
-
-            for i in range(n):
-                if taken[i] == '1':
-                    continue
-
-                taken[i] = '1'
-
-                b = backtracking(i + 1, curSides, curSum + nums[i])
-
-                taken[i] = '0'
-                if b:
-                    memo[(curIndex, curSides, curSum, ''.join(taken))] = True
-                    return True
-
-            memo[(curIndex, curSides, curSum, ''.join(taken))] = False
+        
+        if nums[0] > target:
+            return False  # Largest number can't fit into any subset
+        
+        buckets = [0] * k  # Track the sum in each subset group
+        
+        def backtrack(index):
+            if index == len(nums):
+                return all(bucket == target for bucket in buckets)
+            
+            current = nums[index]
+            
+            for i in range(k):
+                if buckets[i] + current <= target:
+                    buckets[i] += current
+                    if backtrack(index + 1):
+                        return True
+                    buckets[i] -= current
+                
+                if buckets[i] == 0:
+                    break  # Optimization: avoid placing same number in identical empty buckets
+            
             return False
-
-        return backtracking(0, 0, 0)
+        
+        return backtrack(0)
         
